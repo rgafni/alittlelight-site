@@ -4,7 +4,7 @@ Public website for the A Little Light Android app.
 
 Live: https://rgafni.github.io/alittlelight-site/
 
-The planned custom domain is **alittlelight.app**. A `CNAME` file is in this repo. Point DNS at GitHub Pages before the github.io address begins redirecting:
+The planned custom domain is **alittlelight.app**. There is no `CNAME` file in the repo yet, on purpose: adding one makes GitHub redirect the github.io site to the custom domain, which would take the site offline until DNS is in place. After the DNS records below are live, add a repo file named `CNAME` containing exactly `alittlelight.app`, then:
 
 1. At the registrar (Porkbun), add four `A` records for the apex `alittlelight.app`:
    - 185.199.108.153

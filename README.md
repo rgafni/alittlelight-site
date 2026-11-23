@@ -2,20 +2,15 @@
 
 Public website for the A Little Light Android app.
 
-Live: https://rgafni.github.io/alittlelight-site/
+Live: https://alittlelight.app/
 
-The planned custom domain is **alittlelight.app**. There is no `CNAME` file in the repo yet, on purpose: adding one makes GitHub redirect the github.io site to the custom domain, which would take the site offline until DNS is in place. After the DNS records below are live, add a repo file named `CNAME` containing exactly `alittlelight.app`, then:
+The custom domain is **alittlelight.app**. A `CNAME` file in this repo tells GitHub Pages to serve the site there. DNS at the registrar (Porkbun):
 
-1. At the registrar (Porkbun), add four `A` records for the apex `alittlelight.app`:
-   - 185.199.108.153
-   - 185.199.109.153
-   - 185.199.110.153
-   - 185.199.111.153
-2. Add a `CNAME` record for `www` pointing to `rgafni.github.io`.
-3. In the repo's Settings, Pages, confirm the custom domain is `alittlelight.app` and turn on Enforce HTTPS once the certificate is ready.
-4. Then update the `og:image` URLs in the HTML to `https://alittlelight.app/img/og.png`.
+1. Four `A` records for the apex `alittlelight.app`: 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153
+2. A `CNAME` record for `www` pointing to `rgafni.github.io`
+3. In the repo's Settings, Pages, the custom domain is `alittlelight.app`. Enforce HTTPS once the certificate is ready.
 
-Until DNS is live, the working public URL is the GitHub Pages address above.
+The github.io address, https://rgafni.github.io/alittlelight-site/, redirects to the custom domain.
 
 ## What is here
 

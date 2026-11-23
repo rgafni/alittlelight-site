@@ -47,7 +47,7 @@ p{margin:0 0 1em;text-wrap:pretty}
 .lede{font-size:clamp(1.18rem,2.1vw,1.42rem);line-height:1.6;color:var(--ink2)}
 .small{font:400 .86rem/1.6 var(--sans);color:var(--muted)}
 .accent{font-style:italic;color:var(--gold)}
-section{padding:104px 0;position:relative}
+section{padding:104px 0;position:relative;overflow:hidden}
 @media (min-width:900px){section{padding:160px 0}}
 .band{background:var(--bg2)}
 .rule{height:1px;background:var(--line);border:0;margin:0}

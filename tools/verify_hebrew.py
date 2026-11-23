@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
-"""Checks every Hebrew line on the page against Sefaria's "Tanach with Nikkud" text, letter for letter.
-The brand wordmark (class he-name) is the app's name, not a quotation, so it is skipped."""
-import re, sys, json, urllib.request, urllib.parse, html
+"""Checks public pages: the only Hebrew is the app name מְעַט אוֹר, and no Names of Hashem appear."""
+import re, sys, html, pathlib
 
-PAGE = sys.argv[1] if len(sys.argv) > 1 else "index.html"
-src = open(PAGE, encoding="utf-8").read()
-SOURCES = {  # text on the page -> Sefaria ref
-    "Psalms.119.37": None, "Psalms.119.105": None, "Psalms.121.1": None,
-}
-found = [html.unescape(m) for m in re.findall(r'<div class="he" lang="he" dir="rtl"[^>]*>([^<]+)</div>', src)]
-found = sorted(set(found))
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+PAGES = [ROOT / n for n in ("index.html", "about.html", "app.html", "contact.html", "privacy.html")]
+NAME = "מְעַט אוֹר"
+HEBREW = re.compile(r"[\u0590-\u05FF]+(?:[\u0590-\u05FF\s־׳״]*[\u0590-\u05FF]+)?")
+# four-letter Name and common substitutes, after stripping vowels
+NAMES = {"יהוה", "יקוק", "אדני", "ידוד", "אלהים", "אלוהים"}
 
-def fetch(ref):
-    url = "https://www.sefaria.org/api/v3/texts/%s?version=%s&return_format=text_only" % (ref, urllib.parse.quote("hebrew|Tanach with Nikkud"))
-    return json.load(urllib.request.urlopen(url))["versions"][0]["text"]
+def bare(s: str) -> str:
+    return re.sub(r"[\u0591-\u05C7]", "", s)
 
-truth = {ref: fetch(ref) for ref in SOURCES}
 ok = True
-for line in found:
-    hit = [r for r, t in truth.items() if t == line]
-    print(("OK   " if hit else "FAIL ") + (hit[0] if hit else "no exact match") + "  " + line)
-    ok &= bool(hit)
-# no Names of Hashem: the four-letter Name, with any vowels, and common substitutes
-bare = lambda s: re.sub(r"[\u0591-\u05C7]", "", s)
-for line in found:
-    b = bare(line).replace("־", " ")
-    for w in b.split():
-        if w in ("יהוה", "יקוק", "אדני", "ידוד", "אלהים", "אלוהים"):
-            print("NAME FOUND:", line); ok = False
-print("all Hebrew matches Sefaria, no Names:" , ok)
+for page in PAGES:
+    src = html.unescape(page.read_text(encoding="utf-8"))
+    # ignore latin-only; collect Hebrew runs
+    runs = HEBREW.findall(src)
+    # filter out empty / marks-only
+    words_ok = []
+    for run in runs:
+        letters = bare(run).replace("־", " ").replace("׳", "").replace("״", "")
+        letters = " ".join(letters.split())
+        if not letters:
+            continue
+        if letters.replace(" ", "") == bare(NAME).replace(" ", ""):
+            words_ok.append(run)
+            continue
+        print(f"UNEXPECTED HEBREW in {page.name}: {run}")
+        ok = False
+        for w in letters.split():
+            if w in NAMES:
+                print(f"NAME FOUND in {page.name}: {run}")
+                ok = False
+    if "—" in src or "\u2014" in src:
+        print(f"EM DASH in {page.name}")
+        ok = False
+    if "For Roni" in src or "Preview" in src and "preview" not in page.name:
+        # Preview word should not appear on live pages
+        if "For Roni" in src or re.search(r">Preview<", src) or "The live site is unchanged" in src:
+            print(f"INTERNAL PREVIEW COPY in {page.name}")
+            ok = False
+    print(f"{page.name}: Hebrew runs allowed={len(words_ok)}")
+
+print("ok" if ok else "FAILED")
 sys.exit(0 if ok else 1)
